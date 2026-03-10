@@ -7,13 +7,13 @@ import streamDeck, {
   WillDisappearEvent,
   DidReceiveSettingsEvent
 } from "@elgato/streamdeck";
-import { exec } from "child_process";
 import { flightService, FlightStatusData } from "../flight-service";
 import {
   FlightTrackSettings,
   DEFAULT_FLIGHT_TRACK_SETTINGS,
   TimeFormat
 } from "../types";
+import { escapeXml, toNumber, openUrl } from "../utils";
 
 /** Long press threshold in milliseconds */
 const LONG_PRESS_MS = 500;
@@ -124,15 +124,7 @@ export class FlightTrackAction extends SingletonAction<FlightTrackSettings> {
     if (!ident) return;
 
     const url = `https://flightaware.com/live/flight/${encodeURIComponent(ident)}`;
-    const command = process.platform === 'darwin'
-      ? `open "${url}"`
-      : process.platform === 'win32'
-        ? `start "" "${url}"`
-        : `xdg-open "${url}"`;
-
-    exec(command, (error) => {
-      if (error) this.logger.error(`Failed to open browser: ${error}`);
-    });
+    openUrl(url);
   }
 
   private startRefreshTimer(
@@ -143,7 +135,7 @@ export class FlightTrackAction extends SingletonAction<FlightTrackSettings> {
     const existingTimer = this.refreshTimers.get(contextId);
     if (existingTimer) clearInterval(existingTimer);
 
-    const interval = Math.max(settings.refreshInterval, 60) * 1000;
+    const interval = Math.max(toNumber(settings.refreshInterval, 120), 60) * 1000;
     const timer = setInterval(async () => {
       await this.refreshAndDisplay(contextId, ev, settings);
     }, interval);
@@ -433,7 +425,7 @@ export class FlightTrackAction extends SingletonAction<FlightTrackSettings> {
       <text x="12" y="48" text-anchor="start"
         font-family="Arial, Helvetica, sans-serif"
         font-size="46" font-weight="bold" fill="white"
-      >${this.escapeXml(ident)}</text>
+      >${escapeXml(ident)}</text>
     `;
 
     if (bottomText) {
@@ -456,7 +448,7 @@ export class FlightTrackAction extends SingletonAction<FlightTrackSettings> {
         <text x="${S / 2}" y="${statusBaseline}" text-anchor="middle"
           font-family="Arial, Helvetica, sans-serif"
           font-size="${statusFontSize}" font-weight="bold" fill="white"
-        >${this.escapeXml(statusText)}</text>
+        >${escapeXml(statusText)}</text>
       `;
 
       const btLen = bottomText.length;
@@ -473,7 +465,7 @@ export class FlightTrackAction extends SingletonAction<FlightTrackSettings> {
         <text x="${S / 2}" y="${btBaseline}" text-anchor="middle"
           font-family="Arial, Helvetica, sans-serif"
           font-size="${btFontSize}" font-weight="bold" fill="white" fill-opacity="0.85"
-        >${this.escapeXml(bottomText)}</text>
+        >${escapeXml(bottomText)}</text>
       `;
     } else {
       const contentTop = 62;
@@ -494,7 +486,7 @@ export class FlightTrackAction extends SingletonAction<FlightTrackSettings> {
         <text x="${S / 2}" y="${baseline}" text-anchor="middle"
           font-family="Arial, Helvetica, sans-serif"
           font-size="${fontSize}" font-weight="bold" fill="white"
-        >${this.escapeXml(statusText)}</text>
+        >${escapeXml(statusText)}</text>
       `;
     }
 
@@ -521,14 +513,14 @@ export class FlightTrackAction extends SingletonAction<FlightTrackSettings> {
       <text x="12" y="48" text-anchor="start"
         font-family="Arial, Helvetica, sans-serif"
         font-size="46" font-weight="bold" fill="white"
-      >${this.escapeXml(ident)}</text>
+      >${escapeXml(ident)}</text>
     `;
 
     svg += `
       <text x="${S - 12}" y="48" text-anchor="end"
         font-family="Arial, Helvetica, sans-serif"
         font-size="30" font-weight="bold" fill="white" fill-opacity="0.5"
-      >${this.escapeXml(label)}</text>
+      >${escapeXml(label)}</text>
     `;
 
     if (gateLine) {
@@ -544,7 +536,7 @@ export class FlightTrackAction extends SingletonAction<FlightTrackSettings> {
         <text x="${S / 2}" y="${airportBaseline}" text-anchor="middle"
           font-family="Arial, Helvetica, sans-serif"
           font-size="${airportFontSize}" font-weight="bold" fill="white"
-        >${this.escapeXml(airport)}</text>
+        >${escapeXml(airport)}</text>
       `;
 
       const timeFontSize = 38;
@@ -555,7 +547,7 @@ export class FlightTrackAction extends SingletonAction<FlightTrackSettings> {
         <text x="${S / 2}" y="${timeBaseline}" text-anchor="middle"
           font-family="Arial, Helvetica, sans-serif"
           font-size="${timeFontSize}" font-weight="bold" fill="white" fill-opacity="0.85"
-        >${this.escapeXml(timeStr)}</text>
+        >${escapeXml(timeStr)}</text>
       `;
 
       const gateFontSize = 28;
@@ -566,7 +558,7 @@ export class FlightTrackAction extends SingletonAction<FlightTrackSettings> {
         <text x="${S / 2}" y="${gateBaseline}" text-anchor="middle"
           font-family="Arial, Helvetica, sans-serif"
           font-size="${gateFontSize}" font-weight="bold" fill="white" fill-opacity="0.6"
-        >${this.escapeXml(gateLine)}</text>
+        >${escapeXml(gateLine)}</text>
       `;
     } else {
       const airportZone = { top: 62, bottom: 190 };
@@ -580,7 +572,7 @@ export class FlightTrackAction extends SingletonAction<FlightTrackSettings> {
         <text x="${S / 2}" y="${airportBaseline}" text-anchor="middle"
           font-family="Arial, Helvetica, sans-serif"
           font-size="${airportFontSize}" font-weight="bold" fill="white"
-        >${this.escapeXml(airport)}</text>
+        >${escapeXml(airport)}</text>
       `;
 
       const timeFontSize = 42;
@@ -591,7 +583,7 @@ export class FlightTrackAction extends SingletonAction<FlightTrackSettings> {
         <text x="${S / 2}" y="${timeBaseline}" text-anchor="middle"
           font-family="Arial, Helvetica, sans-serif"
           font-size="${timeFontSize}" font-weight="bold" fill="white" fill-opacity="0.85"
-        >${this.escapeXml(timeStr)}</text>
+        >${escapeXml(timeStr)}</text>
       `;
     }
 
@@ -599,12 +591,4 @@ export class FlightTrackAction extends SingletonAction<FlightTrackSettings> {
     return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
   }
 
-  private escapeXml(text: string): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
 }

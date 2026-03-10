@@ -7,7 +7,6 @@ import streamDeck, {
   WillDisappearEvent,
   DidReceiveSettingsEvent
 } from "@elgato/streamdeck";
-import { exec } from "child_process";
 import { atisService } from "../atis-service";
 import {
   CycleSettings,
@@ -17,6 +16,7 @@ import {
   FlightCategory,
   parseAirportList
 } from "../types";
+import { escapeXml, toNumber, openUrl } from "../utils";
 
 /** Long press threshold in milliseconds */
 const LONG_PRESS_MS = 500;
@@ -140,19 +140,7 @@ export class AtisCycleAction extends SingletonAction<CycleSettings> {
     if (!currentAirport) return;
 
     const url = atisService.getAtisWebUrl(currentAirport);
-
-    // Open URL in default browser
-    const command = process.platform === 'darwin'
-      ? `open "${url}"`
-      : process.platform === 'win32'
-        ? `start "" "${url}"`
-        : `xdg-open "${url}"`;
-
-    exec(command, (error) => {
-      if (error) {
-        this.logger.error(`Failed to open browser: ${error}`);
-      }
-    });
+    openUrl(url);
   }
 
   /**
@@ -170,7 +158,7 @@ export class AtisCycleAction extends SingletonAction<CycleSettings> {
     }
 
     // Set up new timer
-    const interval = Math.max(settings.refreshInterval, 30) * 1000; // Minimum 30 seconds
+    const interval = Math.max(toNumber(settings.refreshInterval, 60), 30) * 1000;
     const timer = setInterval(async () => {
       await this.refreshAndDisplay(contextId, ev, settings);
     }, interval);
@@ -191,11 +179,22 @@ export class AtisCycleAction extends SingletonAction<CycleSettings> {
 
     const airports = parseAirportList(settings.airportsStr);
 
-    // Fetch ATIS for all configured airports
-    for (const icao of airports) {
-      const atis = await atisService.getAtis(icao);
-      if (atis) {
-        state.cachedData.set(icao, atis);
+    // Clear stale entries for airports no longer in the list
+    for (const key of state.cachedData.keys()) {
+      if (!airports.includes(key)) state.cachedData.delete(key);
+    }
+
+    // Fetch ATIS for all configured airports in parallel
+    const results = await Promise.allSettled(
+      airports.map(async (icao) => {
+        const atis = await atisService.getAtis(icao);
+        return { icao, atis };
+      })
+    );
+
+    for (const result of results) {
+      if (result.status === 'fulfilled' && result.value.atis) {
+        state.cachedData.set(result.value.icao, result.value.atis);
       }
     }
 
@@ -279,7 +278,7 @@ export class AtisCycleAction extends SingletonAction<CycleSettings> {
           font-size="${infoFontSize}"
           font-weight="bold"
           fill="white"
-        >${this.escapeXml(airportId)}</text>
+        >${escapeXml(airportId)}</text>
         <text
           x="${S - 12}"
           y="${mainBaseline}"
@@ -288,22 +287,11 @@ export class AtisCycleAction extends SingletonAction<CycleSettings> {
           font-size="${mainFontSize}"
           font-weight="bold"
           fill="white"
-        >${this.escapeXml(letter)}</text>
+        >${escapeXml(letter)}</text>
       </svg>
     `;
 
     return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
   }
 
-  /**
-   * Escape XML special characters
-   */
-  private escapeXml(text: string): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
 }

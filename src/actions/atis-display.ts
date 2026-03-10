@@ -17,6 +17,7 @@ import {
   FLIGHT_CATEGORY_COLORS,
   FlightCategory
 } from "../types";
+import { escapeXml, toNumber } from "../utils";
 
 @action({ UUID: "com.starkenburg.atis.display" })
 export class AtisDisplayAction extends SingletonAction<AtisSettings> {
@@ -107,7 +108,7 @@ export class AtisDisplayAction extends SingletonAction<AtisSettings> {
     }
 
     // Set up new timer
-    const interval = Math.max(settings.refreshInterval, 30) * 1000; // Minimum 30 seconds
+    const interval = Math.max(toNumber(settings.refreshInterval, 60), 30) * 1000;
     const timer = setInterval(async () => {
       await this.refreshAndDisplay(contextId, ev, settings);
     }, interval);
@@ -277,7 +278,7 @@ export class AtisDisplayAction extends SingletonAction<AtisSettings> {
           font-size="${infoFontSize}"
           font-weight="bold"
           fill="white"
-        >${this.escapeXml(airportId)}</text>
+        >${escapeXml(airportId)}</text>
       `;
     }
 
@@ -301,7 +302,7 @@ export class AtisDisplayAction extends SingletonAction<AtisSettings> {
           font-size="${mainFontSize}"
           font-weight="bold"
           fill="white"
-        >${this.escapeXml(mainText)}</text>
+        >${escapeXml(mainText)}</text>
       `;
     } else {
       // Detail field — optimized layout for maximum readability
@@ -340,7 +341,7 @@ export class AtisDisplayAction extends SingletonAction<AtisSettings> {
           font-weight="bold"
           fill="white"
           fill-opacity="0.5"
-        >${this.escapeXml(label)}</text>
+        >${escapeXml(label)}</text>
       `;
     }
 
@@ -411,7 +412,7 @@ export class AtisDisplayAction extends SingletonAction<AtisSettings> {
           font-size="${fontSize}"
           font-weight="bold"
           fill="white"
-        >${this.escapeXml(lines[i])}</text>
+        >${escapeXml(lines[i])}</text>
       `;
     }
 
@@ -464,15 +465,4 @@ export class AtisDisplayAction extends SingletonAction<AtisSettings> {
     return digits;
   }
 
-  /**
-   * Escape XML special characters
-   */
-  private escapeXml(text: string): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
 }

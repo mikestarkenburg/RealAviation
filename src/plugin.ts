@@ -4,8 +4,7 @@ import { AtisCycleAction } from "./actions/atis-cycle";
 import { FlightTrackAction } from "./actions/flight-track";
 import { AirportDelayAction } from "./actions/airport-delay";
 
-// Enable debug logging
-streamDeck.logger.setLevel("debug");
+streamDeck.logger.setLevel("info");
 
 // Register all actions
 streamDeck.actions.registerAction(new AtisDisplayAction());

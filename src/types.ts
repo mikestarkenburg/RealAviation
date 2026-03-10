@@ -11,8 +11,7 @@ export type FlightCategory = 'VFR' | 'MVFR' | 'IFR' | 'LIFR' | 'UNKNOWN';
 export type TimeFormat = 'zulu' | 'local';
 
 /**
- * ATIS response from the API
- * NOTE: Verify this structure against actual atis.info API response
+ * Parsed ATIS data (from atis.info API)
  */
 export interface AtisResponse {
   airport: string;
@@ -140,13 +139,17 @@ export const DEFAULT_FLIGHT_TRACK_SETTINGS: FlightTrackSettings = {
  */
 export interface AirportDelaySettings {
   airport: string;
-  refreshInterval: number; // seconds
+  apiKey: string;           // FlightAware AeroAPI key (optional, for enhanced delay data)
+  refreshInterval: number;  // seconds (FAA data, free)
+  apiRefreshInterval: number; // seconds (AeroAPI data, costs credits)
   [key: string]: JsonValue;
 }
 
 export const DEFAULT_DELAY_SETTINGS: AirportDelaySettings = {
   airport: 'KSFO',
-  refreshInterval: 120 // 2 minutes
+  apiKey: '',
+  refreshInterval: 120,      // 2 minutes (FAA is free)
+  apiRefreshInterval: 900     // 15 minutes (AeroAPI costs ~$0.005/query)
 };
 
 /**

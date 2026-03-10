@@ -3,7 +3,7 @@
 <head lang="en">
   <meta charset="utf-8" />
   <title>Airport Delay Settings</title>
-  <script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+  <script src="sdpi-components.js"></script>
 </head>
 <body>
 
@@ -12,9 +12,21 @@
     <sdpi-textfield setting="airport" placeholder="KSFO" maxlength="4"></sdpi-textfield>
   </sdpi-item>
 
-  <!-- Refresh Interval -->
+  <!-- Refresh Interval (FAA data, free) -->
   <sdpi-item label="Refresh (sec)">
     <sdpi-range setting="refreshInterval" min="60" max="600" step="60" default="120" showlabels></sdpi-range>
+  </sdpi-item>
+
+  <hr />
+
+  <!-- AeroAPI Key (optional, for enhanced delay data) -->
+  <sdpi-item label="AeroAPI Key">
+    <sdpi-textfield setting="apiKey" placeholder="Optional — for flight delay counts" type="password"></sdpi-textfield>
+  </sdpi-item>
+
+  <!-- AeroAPI Refresh Interval (costs credits) -->
+  <sdpi-item label="API Refresh (sec)">
+    <sdpi-range setting="apiRefreshInterval" min="300" max="3600" step="300" default="900" showlabels></sdpi-range>
   </sdpi-item>
 
 </body>

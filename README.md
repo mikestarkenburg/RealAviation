@@ -41,7 +41,11 @@ FlightAware provides approximately $5/month in free API credit (~100 queries). A
 ### Airport Delays
 Shows FAA ground delay programs, ground stops, and airport closures. Press to cycle through status, reason, and delay time.
 
-Colors: green (no delays), amber (ground delay program), red (ground stop), dark red (closure).
+**Without an API key (free):** Uses the FAA NAS Status API to show formal Traffic Management Initiatives — Ground Delay Programs (GDP), Ground Stops, and airport closures. These are official FAA-imposed restrictions.
+
+**With a FlightAware AeroAPI key (enhanced):** Also fetches flight-level delay data from FlightAware, showing how many individual flights are delayed or cancelled at the airport. This catches situations where flights are delayed but no formal FAA program is in effect. Press to cycle through an additional "FLIGHTS" page showing delay counts. AeroAPI refreshes on a separate, slower timer (default 15 min) to conserve API credits.
+
+Colors: green (no delays), amber (ground delay program or flight delays), red (ground stop), dark red (closure).
 
 ## Setup
 
@@ -79,7 +83,8 @@ RealAviation/
 │   ├── types.ts                 # Settings interfaces and constants
 │   ├── atis-service.ts          # ATIS data from atis.info API
 │   ├── flight-service.ts        # Flight data (AeroAPI + OpenSky fallback)
-│   ├── delay-service.ts         # FAA NAS Status API client
+│   ├── delay-service.ts         # FAA NAS Status + AeroAPI delay client
+│   ├── utils.ts                 # Shared utilities (XML escaping, URL opening)
 │   └── actions/
 │       ├── atis-display.ts      # Single airport ATIS
 │       ├── atis-cycle.ts        # Multi-airport cycling
@@ -101,7 +106,8 @@ RealAviation/
 | ATIS | atis.info | No | Free |
 | Flight Tracking (basic) | OpenSky Network | No | Free (400 credits/day) |
 | Flight Tracking (enhanced) | FlightAware AeroAPI v4 | API key | ~$5/mo free credit |
-| Airport Delays | FAA NAS Status | No | Free |
+| Airport Delays (basic) | FAA NAS Status | No | Free |
+| Airport Delays (enhanced) | FlightAware AeroAPI v4 | API key | ~$5/mo free credit |
 
 ## License
 

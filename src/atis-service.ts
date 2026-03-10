@@ -1,5 +1,6 @@
 import streamDeck from "@elgato/streamdeck";
 import type { AtisResponse, StationInfo, FlightCategory } from "./types";
+import { escapeRegex } from "./utils";
 
 const API_BASE = 'https://atis.info/api';
 
@@ -132,8 +133,8 @@ export class AtisService {
     const windMatch = datis.match(/\b((?:VRB|\d{3})\d{2,3}(?:G\d{2,3})?KT)\b/);
     if (windMatch) result.wind = windMatch[1];
 
-    // Visibility: 10SM, 3SM, 1/2SM, 1 1/2SM, P6SM
-    const visMatch = datis.match(/\b(P?\d+(?:\s+\d+)?(?:\/\d+)?\s*SM)\b/);
+    // Visibility: 10SM, 3SM, 1/2SM, 1 1/2SM, P6SM, M1/4SM
+    const visMatch = datis.match(/\b(M?P?\d+(?:\s+\d+)?(?:\/\d+)?\s*SM)\b/);
     if (visMatch) {
       result.visibilityStr = visMatch[1];
       result.visibility = this.parseVisibilityValue(visMatch[1]);
@@ -162,7 +163,7 @@ export class AtisService {
     // Extract approximate METAR portion (from wind to altimeter)
     if (result.wind && result.altimeter) {
       const metarMatch = datis.match(new RegExp(
-        `${result.wind}.*?${result.altimeter}`,
+        `${escapeRegex(result.wind)}.*?${escapeRegex(result.altimeter)}`,
         'i'
       ));
       if (metarMatch) {
@@ -179,8 +180,8 @@ export class AtisService {
   private parseVisibilityValue(visStr: string): number | null {
     if (!visStr) return null;
 
-    // Remove SM suffix and P prefix
-    let str = visStr.replace(/SM$/i, '').replace(/^P/, '').trim();
+    // Remove SM suffix, P prefix, M prefix
+    let str = visStr.replace(/SM$/i, '').replace(/^[MP]+/i, '').trim();
 
     // Handle mixed number like "1 1/2"
     if (str.includes(' ')) {
@@ -195,8 +196,9 @@ export class AtisService {
       return this.parseFraction(str);
     }
 
-    // Simple integer
-    return parseInt(str, 10) || null;
+    // Simple integer (0 is valid for zero visibility)
+    const val = parseInt(str, 10);
+    return Number.isFinite(val) ? val : null;
   }
 
   /**
@@ -244,6 +246,11 @@ export class AtisService {
     // MVFR: Ceiling 1000-3000ft OR Visibility 3-5SM
     if ((ceiling !== null && ceiling <= 3000) || (visibility !== null && visibility <= 5)) {
       return 'MVFR';
+    }
+
+    // If we have no ceiling AND no visibility data, we can't determine category
+    if (ceiling === null && visibility === null) {
+      return 'UNKNOWN';
     }
 
     // VFR: Ceiling > 3000ft AND Visibility > 5SM (or unlimited)

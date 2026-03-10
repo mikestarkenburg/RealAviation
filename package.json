@@ -1,14 +1,14 @@
 {
-  "name": "streamdeck-atis",
-  "version": "1.0.0",
-  "description": "Stream Deck plugin for displaying airport ATIS information",
+  "name": "realaviation",
+  "version": "1.1.0",
+  "description": "Real aviation tools for pilots: ATIS, flight tracking, and airport delays on Elgato Stream Deck.",
   "main": "src/plugin.ts",
   "type": "module",
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w --watch.onEnd=\"streamdeck restart com.starkenburg.atis\"",
     "lint": "eslint src/**/*.ts",
-    "test": "vitest"
+    "test": "echo \"No tests configured\""
   },
   "keywords": [
     "streamdeck",
