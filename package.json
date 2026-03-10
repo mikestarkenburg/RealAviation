@@ -1,0 +1,35 @@
+{
+  "name": "streamdeck-atis",
+  "version": "1.0.0",
+  "description": "Stream Deck plugin for displaying airport ATIS information",
+  "main": "src/plugin.ts",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w --watch.onEnd=\"streamdeck restart com.starkenburg.atis\"",
+    "lint": "eslint src/**/*.ts",
+    "test": "vitest"
+  },
+  "keywords": [
+    "streamdeck",
+    "elgato",
+    "aviation",
+    "atis",
+    "pilot"
+  ],
+  "author": "Starkenburg Group",
+  "license": "MIT",
+  "devDependencies": {
+    "@elgato/cli": "^1.6.0",
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/node": "^20.10.0",
+    "rollup": "^4.9.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.2"
+  },
+  "dependencies": {
+    "@elgato/streamdeck": "^2.0.2"
+  }
+}

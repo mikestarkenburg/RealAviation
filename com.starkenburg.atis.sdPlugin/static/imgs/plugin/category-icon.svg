@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+  <defs>
+    <clipPath id="dial">
+      <circle cx="14" cy="14" r="12"/>
+    </clipPath>
+  </defs>
+  <!-- Bezel ring -->
+  <circle cx="14" cy="14" r="13" fill="#444" stroke="#666" stroke-width="1"/>
+  <!-- Sky (blue) -->
+  <rect x="0" y="0" width="28" height="14" fill="#2277CC" clip-path="url(#dial)"/>
+  <!-- Ground (brown) -->
+  <rect x="0" y="14" width="28" height="14" fill="#8B5E3C" clip-path="url(#dial)"/>
+  <!-- Horizon line -->
+  <line x1="2" y1="14" x2="26" y2="14" stroke="white" stroke-width="1.2" clip-path="url(#dial)"/>
+  <!-- Pitch marks -->
+  <line x1="10" y1="10" x2="18" y2="10" stroke="white" stroke-width="0.6" opacity="0.7" clip-path="url(#dial)"/>
+  <line x1="10" y1="18" x2="18" y2="18" stroke="white" stroke-width="0.6" opacity="0.7" clip-path="url(#dial)"/>
+  <!-- Aircraft symbol (wings + center dot) -->
+  <circle cx="14" cy="14" r="1.3" fill="#FFB800"/>
+  <line x1="6" y1="14" x2="11" y2="14" stroke="#FFB800" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="17" y1="14" x2="22" y2="14" stroke="#FFB800" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Bank index triangle at top -->
+  <polygon points="14,2.5 12.5,5 15.5,5" fill="white" opacity="0.8"/>
+</svg>

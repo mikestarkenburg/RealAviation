@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="utf-8" />
+  <title>Flight Track Settings</title>
+  <script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+</head>
+<body>
+
+  <!-- Flight Identifier -->
+  <sdpi-item label="Flight / Tail #">
+    <sdpi-textfield setting="flightIdent" placeholder="UA1234 or N12345"></sdpi-textfield>
+  </sdpi-item>
+
+  <!-- AeroAPI Key -->
+  <sdpi-item label="AeroAPI Key">
+    <sdpi-textfield setting="apiKey" type="password" placeholder="Your FlightAware API key"></sdpi-textfield>
+  </sdpi-item>
+
+  <!-- Time Format -->
+  <sdpi-item label="Time Format">
+    <sdpi-select setting="timeFormat">
+      <option value="zulu">Zulu (UTC)</option>
+      <option value="local">Local</option>
+    </sdpi-select>
+  </sdpi-item>
+
+  <!-- Bottom Line -->
+  <sdpi-item label="Status Line">
+    <sdpi-select setting="bottomLine">
+      <option value="depTime">Departure Time</option>
+      <option value="date">Date</option>
+      <option value="route">Route</option>
+    </sdpi-select>
+  </sdpi-item>
+
+  <!-- Refresh Interval -->
+  <sdpi-item label="Refresh (sec)">
+    <sdpi-range setting="refreshInterval" min="60" max="600" step="60" default="120" showlabels></sdpi-range>
+  </sdpi-item>
+
+</body>
+</html>

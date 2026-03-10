@@ -1,0 +1,101 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "UUID": "com.starkenburg.atis",
+  "Name": "ATIS Display",
+  "Version": "1.0.0.0",
+  "Author": "Starkenburg Group",
+  "Description": "Real aviation tools: ATIS display, flight tracking, and airport delay status with flight category color coding.",
+  "URL": "https://github.com/starkenburg/streamdeck-atis",
+  "Category": "RealAviation",
+  "CategoryIcon": "static/imgs/plugin/category-icon",
+  "CodePath": "bin/plugin.js",
+  "Icon": "static/imgs/plugin/marketplace",
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "6.6"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.15"
+    },
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "enabled"
+  },
+  "Actions": [
+    {
+      "Name": "ATIS - Single Airport",
+      "UUID": "com.starkenburg.atis.display",
+      "Icon": "static/imgs/actions/atis/icon",
+      "Tooltip": "Displays ATIS details for a single airport. Press to cycle through letter, time, wind, visibility, clouds, temperature, and altimeter.",
+      "Controllers": ["Keypad"],
+      "PropertyInspectorPath": "ui/atis-settings.html",
+      "UserTitleEnabled": false,
+      "States": [
+        {
+          "Image": "static/imgs/actions/atis/key",
+          "TitleParameters": {
+            "showTitle": false
+          }
+        }
+      ]
+    },
+    {
+      "Name": "ATIS - Multiple Airports",
+      "UUID": "com.starkenburg.atis.cycle",
+      "Icon": "static/imgs/actions/atis/icon",
+      "Tooltip": "Cycles through multiple airports showing ATIS letter and flight category. Short press to cycle, long press to open in browser.",
+      "Controllers": ["Keypad"],
+      "PropertyInspectorPath": "ui/atis-cycle-settings.html",
+      "UserTitleEnabled": false,
+      "States": [
+        {
+          "Image": "static/imgs/actions/atis/key",
+          "TitleParameters": {
+            "showTitle": false
+          }
+        }
+      ]
+    },
+    {
+      "Name": "Flight Tracker",
+      "UUID": "com.starkenburg.atis.flighttrack",
+      "Icon": "static/imgs/actions/atis/icon",
+      "Tooltip": "Track a live flight via OpenSky Network. Shows altitude, speed, heading, and vertical rate. Enter an ADS-B callsign (e.g., UAL1234).",
+      "Controllers": ["Keypad"],
+      "PropertyInspectorPath": "ui/flight-track-settings.html",
+      "UserTitleEnabled": false,
+      "States": [
+        {
+          "Image": "static/imgs/actions/atis/key",
+          "TitleParameters": {
+            "showTitle": false
+          }
+        }
+      ]
+    },
+    {
+      "Name": "Airport Delays",
+      "UUID": "com.starkenburg.atis.delay",
+      "Icon": "static/imgs/actions/atis/icon",
+      "Tooltip": "Shows FAA ground delay programs, ground stops, and airport closures. Green = no delays, amber = GDP, red = ground stop or closure.",
+      "Controllers": ["Keypad"],
+      "PropertyInspectorPath": "ui/airport-delay-settings.html",
+      "UserTitleEnabled": false,
+      "States": [
+        {
+          "Image": "static/imgs/actions/atis/key",
+          "TitleParameters": {
+            "showTitle": false
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="utf-8" />
+  <title>Airport Delay Settings</title>
+  <script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+</head>
+<body>
+
+  <!-- Airport -->
+  <sdpi-item label="Airport">
+    <sdpi-textfield setting="airport" placeholder="KSFO" maxlength="4"></sdpi-textfield>
+  </sdpi-item>
+
+  <!-- Refresh Interval -->
+  <sdpi-item label="Refresh (sec)">
+    <sdpi-range setting="refreshInterval" min="60" max="600" step="60" default="120" showlabels></sdpi-range>
+  </sdpi-item>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+# Ignore these files when packaging plugin
+logs/
+*.log
+.DS_Store
+Thumbs.db
+*.map
