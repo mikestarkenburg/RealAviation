@@ -50,7 +50,7 @@ Colors: green (no delays), amber (ground delay program or flight delays), red (g
 ## Setup
 
 ### Prerequisites
-- Stream Deck v6.6+
+- Stream Deck v6.9+
 - Node.js v20+
 - Stream Deck CLI (`npm install -g @elgato/cli`)
 

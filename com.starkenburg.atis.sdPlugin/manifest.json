@@ -10,9 +10,9 @@
   "CategoryIcon": "static/imgs/plugin/category-icon",
   "CodePath": "bin/plugin.js",
   "Icon": "static/imgs/plugin/marketplace",
-  "SDKVersion": 2,
+  "SDKVersion": 3,
   "Software": {
-    "MinimumVersion": "6.6"
+    "MinimumVersion": "6.9"
   },
   "OS": [
     {
