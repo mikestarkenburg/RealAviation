@@ -1,7 +1,7 @@
 import streamDeck from "@elgato/streamdeck";
 
 /**
- * Flight status data from FlightAware AeroAPI v4
+ * Flight status data — unified interface for both AeroAPI and OpenSky
  */
 export interface FlightStatusData {
   ident: string;
@@ -24,29 +24,43 @@ export interface FlightStatusData {
   cancelled: boolean;
   diverted: boolean;
   progressPercent: number | null;
+  // Position data (OpenSky only)
+  altitude: number | null;       // feet
+  speed: number | null;          // knots (ground speed)
+  heading: number | null;        // degrees true
+  verticalRate: number | null;   // ft/min
+  // Data source indicator
+  dataSource: 'aeroapi' | 'opensky';
 }
 
 /**
- * Service for flight status via FlightAware AeroAPI v4
- * https://www.flightaware.com/aeroapi/portal
- *
- * Auth: x-apikey header
- * Free tier: ~$5/month credit (~100 queries)
+ * Service for flight status via FlightAware AeroAPI v4 or OpenSky Network fallback
  */
 export class FlightService {
   private logger = streamDeck.logger.createScope("FlightService");
-  private readonly BASE_URL = 'https://aeroapi.flightaware.com/aeroapi';
+  private readonly AERO_URL = 'https://aeroapi.flightaware.com/aeroapi';
+  private readonly OPENSKY_URL = 'https://opensky-network.org/api';
+
+  // Cache for OpenSky icao24 lookups
+  private icao24Cache: Map<string, string> = new Map();
 
   /**
-   * Get flight status by flight number or tail/registration number.
-   * AeroAPI auto-detects identifier type.
-   * Returns the most relevant flight (upcoming or most recently active).
+   * Get flight status. Uses AeroAPI if apiKey provided, otherwise falls back to OpenSky.
    */
   async getFlightStatus(ident: string, apiKey: string): Promise<FlightStatusData | null> {
-    if (!ident || !apiKey) return null;
+    if (!ident) return null;
 
+    if (apiKey) {
+      return this.getAeroApiStatus(ident, apiKey);
+    }
+    return this.getOpenSkyStatus(ident);
+  }
+
+  // ── AeroAPI (FlightAware) ──────────────────────────────────
+
+  private async getAeroApiStatus(ident: string, apiKey: string): Promise<FlightStatusData | null> {
     try {
-      const url = `${this.BASE_URL}/flights/${encodeURIComponent(ident)}`;
+      const url = `${this.AERO_URL}/flights/${encodeURIComponent(ident)}`;
       const response = await fetch(url, {
         headers: { 'x-apikey': apiKey }
       });
@@ -64,33 +78,23 @@ export class FlightService {
         return null;
       }
 
-      // Pick the most relevant flight:
-      // 1. Currently active (en route, taxiing)
-      // 2. Next upcoming (scheduled, not yet departed)
-      // 3. Most recently landed/arrived
       const flight = this.pickRelevantFlight(flights);
       if (!flight) return null;
 
-      return this.parseFlight(flight);
+      return this.parseAeroApiFlight(flight);
     } catch (error) {
-      this.logger.error(`Error fetching flight status: ${error}`);
+      this.logger.error(`AeroAPI error: ${error}`);
       return null;
     }
   }
 
-  /**
-   * Pick the most relevant flight from the results array.
-   * Priority: active > upcoming scheduled > most recent landed
-   */
   private pickRelevantFlight(flights: any[]): any {
-    // Active flights (en route, taxiing)
     const active = flights.find((f: any) => {
       const s = (f.status || '').toLowerCase();
       return s.includes('en route') || s.includes('taxiing') || s === 'active';
     });
     if (active) return active;
 
-    // Upcoming scheduled flights (not yet departed, not cancelled)
     const now = new Date();
     const upcoming = flights
       .filter((f: any) => {
@@ -108,11 +112,9 @@ export class FlightService {
       });
     if (upcoming.length > 0) return upcoming[0];
 
-    // Cancelled flights (show if nothing else)
     const cancelled = flights.find((f: any) => f.cancelled);
     if (cancelled) return cancelled;
 
-    // Most recently landed
     const landed = flights
       .filter((f: any) => {
         const s = (f.status || '').toLowerCase();
@@ -121,15 +123,14 @@ export class FlightService {
       .sort((a: any, b: any) => {
         const aTime = a.actual_in || a.actual_on || '';
         const bTime = b.actual_in || b.actual_on || '';
-        return bTime.localeCompare(aTime); // most recent first
+        return bTime.localeCompare(aTime);
       });
     if (landed.length > 0) return landed[0];
 
-    // Fallback: first result
     return flights[0];
   }
 
-  private parseFlight(f: any): FlightStatusData {
+  private parseAeroApiFlight(f: any): FlightStatusData {
     return {
       ident: f.ident || '',
       status: f.status || 'Unknown',
@@ -150,7 +151,111 @@ export class FlightService {
       arrivalDelay: f.arrival_delay != null ? f.arrival_delay : null,
       cancelled: f.cancelled === true,
       diverted: f.diverted === true,
-      progressPercent: f.progress_percent != null ? f.progress_percent : null
+      progressPercent: f.progress_percent != null ? f.progress_percent : null,
+      altitude: null,
+      speed: null,
+      heading: null,
+      verticalRate: null,
+      dataSource: 'aeroapi'
+    };
+  }
+
+  // ── OpenSky Network (free, no API key) ─────────────────────
+
+  private async getOpenSkyStatus(callsign: string): Promise<FlightStatusData | null> {
+    try {
+      const normalizedCallsign = callsign.trim().toUpperCase();
+      let state: any[] | null = null;
+
+      // Try cached icao24 first for efficiency
+      const cachedIcao24 = this.icao24Cache.get(normalizedCallsign);
+      if (cachedIcao24) {
+        state = await this.fetchOpenSkyByIcao24(cachedIcao24);
+        if (!state) {
+          // Aircraft may have landed — clear cache and try full search
+          this.icao24Cache.delete(normalizedCallsign);
+        }
+      }
+
+      if (!state) {
+        // Full search — expensive but necessary for first lookup
+        const result = await this.fetchOpenSkyByCallsign(normalizedCallsign);
+        if (!result) return null;
+        state = result.state;
+        this.icao24Cache.set(normalizedCallsign, result.icao24);
+      }
+
+      return this.parseOpenSkyState(state, normalizedCallsign);
+    } catch (error) {
+      this.logger.error(`OpenSky error: ${error}`);
+      return null;
+    }
+  }
+
+  private async fetchOpenSkyByCallsign(callsign: string): Promise<{ state: any[]; icao24: string } | null> {
+    const response = await fetch(`${this.OPENSKY_URL}/states/all`);
+    if (!response.ok) {
+      this.logger.error(`OpenSky API error: ${response.status}`);
+      return null;
+    }
+
+    const json: any = await response.json();
+    if (!json.states || json.states.length === 0) return null;
+
+    const state = json.states.find((s: any[]) =>
+      (s[1] || '').trim().toUpperCase() === callsign
+    );
+
+    if (!state) {
+      this.logger.info(`Callsign ${callsign} not found in ${json.states.length} states`);
+      return null;
+    }
+
+    return { state, icao24: state[0] };
+  }
+
+  private async fetchOpenSkyByIcao24(icao24: string): Promise<any[] | null> {
+    const response = await fetch(`${this.OPENSKY_URL}/states/all?icao24=${icao24.toLowerCase()}`);
+    if (!response.ok) return null;
+
+    const json: any = await response.json();
+    if (!json.states || json.states.length === 0) return null;
+
+    return json.states[0];
+  }
+
+  private parseOpenSkyState(state: any[], callsign: string): FlightStatusData {
+    const altMeters = state[7];
+    const speedMs = state[9];
+    const vrateMs = state[11];
+    const onGround = state[8];
+
+    return {
+      ident: callsign,
+      status: onGround ? 'On Ground' : 'En Route',
+      origin: null,
+      destination: null,
+      registration: null,
+      gateOrigin: null,
+      gateDestination: null,
+      terminalOrigin: null,
+      terminalDestination: null,
+      scheduledOut: null,
+      estimatedOut: null,
+      actualOut: null,
+      scheduledIn: null,
+      estimatedIn: null,
+      actualIn: null,
+      departureDelay: null,
+      arrivalDelay: null,
+      cancelled: false,
+      diverted: false,
+      progressPercent: null,
+      altitude: altMeters != null ? Math.round(altMeters * 3.28084) : null,
+      speed: speedMs != null ? Math.round(speedMs * 1.94384) : null,
+      heading: state[10] != null ? Math.round(state[10]) : null,
+      verticalRate: vrateMs != null ? Math.round(vrateMs * 196.85) : null,
+      dataSource: 'opensky'
     };
   }
 }

@@ -1,11 +1,11 @@
 {
   "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
   "UUID": "com.starkenburg.atis",
-  "Name": "ATIS Display",
-  "Version": "1.0.0.0",
+  "Name": "RealAviation",
+  "Version": "1.1.0.0",
   "Author": "Starkenburg Group",
-  "Description": "Real aviation tools: ATIS display, flight tracking, and airport delay status with flight category color coding.",
-  "URL": "https://github.com/starkenburg/streamdeck-atis",
+  "Description": "Real aviation tools for pilots: ATIS display, flight tracking, and airport delay status with flight category color coding.",
+  "URL": "https://github.com/mikestarkenburg/RealAviation",
   "Category": "RealAviation",
   "CategoryIcon": "static/imgs/plugin/category-icon",
   "CodePath": "bin/plugin.js",
@@ -66,14 +66,14 @@
     {
       "Name": "Flight Tracker",
       "UUID": "com.starkenburg.atis.flighttrack",
-      "Icon": "static/imgs/actions/atis/icon",
-      "Tooltip": "Track a live flight via OpenSky Network. Shows altitude, speed, heading, and vertical rate. Enter an ADS-B callsign (e.g., UAL1234).",
+      "Icon": "static/imgs/actions/flight-track/icon",
+      "Tooltip": "Track a flight by number or tail number. Shows status, departure, and arrival info. Works free with OpenSky or enhanced with FlightAware AeroAPI.",
       "Controllers": ["Keypad"],
       "PropertyInspectorPath": "ui/flight-track-settings.html",
       "UserTitleEnabled": false,
       "States": [
         {
-          "Image": "static/imgs/actions/atis/key",
+          "Image": "static/imgs/actions/flight-track/key",
           "TitleParameters": {
             "showTitle": false
           }
@@ -83,14 +83,14 @@
     {
       "Name": "Airport Delays",
       "UUID": "com.starkenburg.atis.delay",
-      "Icon": "static/imgs/actions/atis/icon",
+      "Icon": "static/imgs/actions/delay/icon",
       "Tooltip": "Shows FAA ground delay programs, ground stops, and airport closures. Green = no delays, amber = GDP, red = ground stop or closure.",
       "Controllers": ["Keypad"],
       "PropertyInspectorPath": "ui/airport-delay-settings.html",
       "UserTitleEnabled": false,
       "States": [
         {
-          "Image": "static/imgs/actions/atis/key",
+          "Image": "static/imgs/actions/delay/key",
           "TitleParameters": {
             "showTitle": false
           }

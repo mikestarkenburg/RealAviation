@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">
+  <rect width="72" height="72" fill="#2277CC" rx="6"/>
+  <!-- Airplane silhouette -->
+  <g transform="translate(36,36) rotate(-45)" fill="white">
+    <ellipse cx="0" cy="0" rx="5" ry="18"/>
+    <polygon points="-22,-3 22,-3 14,3 -14,3"/>
+    <polygon points="-9,13 9,13 6,16 -6,16"/>
+  </g>
+</svg>

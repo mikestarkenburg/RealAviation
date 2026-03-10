@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">
+  <rect width="72" height="72" fill="#CC8800" rx="6"/>
+  <!-- Warning triangle -->
+  <polygon points="36,12 64,60 8,60" fill="none" stroke="white" stroke-width="4" stroke-linejoin="round"/>
+  <text x="36" y="54" text-anchor="middle" font-family="Arial" font-size="28" font-weight="bold" fill="white">!</text>
+</svg>
