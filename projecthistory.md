@@ -78,6 +78,18 @@ Over several development sessions, the plugin grew from one action into a full a
 - **Offline support**: Bundled sdpi-components.js locally instead of loading from CDN, so settings panels work without internet
 - **Metadata**: Synced version numbers between package.json and manifest.json, updated package name and description
 
+### Phase 9 — Security Audit and Contributor Cleanup
+- Full security audit of the GitHub repository — checked for leaked API keys, secrets in git history, .gitignore coverage, and build output exposure
+- Clean bill of health: no credentials in code or history, .gitignore properly excludes node_modules, dist, and build artifacts
+- Removed unintended Co-Authored-By trailers from all git commits using `git filter-branch` and force-pushed to clean up the contributor list
+
+### Phase 10 — Marketplace Submission Prep
+- Bumped manifest `SDKVersion` to 3 and `Software.MinimumVersion` to 6.9 (required for Elgato Marketplace DRM)
+- Generated PNG icons at all required sizes from SVGs: marketplace icon (288px + 512px @2x), category icon (28px + 56px @2x), action icons (20px + 40px @2x), action key images (72px + 144px @2x) — 16 PNGs total
+- Created `MARKETPLACE.md` with submission description, tags, category, and support URLs for the Maker Console
+- Updated README prerequisites to reflect new minimum Stream Deck version
+- Updated GitHub repo description and homepage URL
+
 ## Architecture
 
 - **Runtime**: Elgato Stream Deck SDK v2 with TypeScript and TC39 decorators
